@@ -16,7 +16,7 @@ adPvaServerSupport_SRCS += adPvaServer.cpp
 adPvaServerSupport_SRCS += ndarray.cpp
 adPvaServerSupport_SRCS += NDArrayRecord.cpp
 
-adPvaServerSupport_LIBS += Com pvData pvAccess pvDatabase
+adPvaServerSupport_LIBS += Com pvData pvAccess pvDatabase nt
 
 
 # ------------------------
@@ -46,7 +46,7 @@ adPvaServer_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 # This line says that this IOC Application depends on the
 # xxx Support Module
-adPvaServer_LIBS += Com pvData pvAccess pvDatabase
+adPvaServer_LIBS += Com pvData pvAccess pvDatabase nt
 
 # We need to link this IOC Application against the EPICS Base libraries
 adPvaServer_LIBS += $(EPICS_BASE_IOC_LIBS)

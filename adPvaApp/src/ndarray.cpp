@@ -13,6 +13,7 @@
 
 #include <pv/pvData.h>
 #include <pv/standardField.h>
+#include <pv/ntndarray.h>
 
 #include <epicsTime.h>
 
@@ -48,23 +49,18 @@ private:
 };
 
 
-UnionConstPtr getValueType()
+StructureConstPtr getNDArrayStruc()
 {
-    static UnionConstPtr valueType;
+    static StructureConstPtr arrayStruc;
 
-    if (valueType == NULL)
+    if (arrayStruc == NULL)
     {
-        FieldBuilderPtr fb = getFieldCreate()->createFieldBuilder();
-        
-        for (int i = pvBoolean; i < pvString; ++i)
-        {
-            ScalarType st = static_cast<ScalarType>(i);
-            fb->addArray(std::string(ScalarTypeFunc::name(st)) + "Value", st);
-        }
-
-        valueType = fb->createUnion();                
+        nt::NTNDArrayBuilderPtr builder = nt::NTNDArray::createBuilder();
+        builder->addDescriptor()->addTimeStamp()->addAlarm()->addDisplay();
+        arrayStruc = builder->createStructure();
     }
-    return valueType;
+
+    return arrayStruc;
 }
 
 StructureConstPtr getAttributeStruc()
@@ -73,56 +69,12 @@ StructureConstPtr getAttributeStruc()
 
     if (attributeStruc == NULL)
     {
-        FieldBuilderPtr fb = getFieldCreate()->createFieldBuilder();
-        
-        attributeStruc = fb->setId("epics:nt/NTAttribute:1.0")->
-            add("name", pvString)->
-            add("value", getFieldCreate()->createVariantUnion())->
-            add("descriptor", pvString)->
-            add("sourceType", pvInt)->
-            add("source", pvString)->
-            createStructure();           
+        attributeStruc = std::tr1::dynamic_pointer_cast<const StructureArray>(
+            getNDArrayStruc()->getField("attribute"))->getStructure();
+        //attributeStruc = getNDArrayStruc()->
+        //   getField<StructureArray>("attribute")->getStructure();
     }
     return attributeStruc;
-}
-
-StructureConstPtr getNDArrayStruc()
-{
-    static StructureConstPtr arrayStruc;
-
-    if (arrayStruc == NULL)
-    {
-        FieldCreatePtr fieldCreate = getFieldCreate();
-        StructureConstPtr timeStruc = getStandardField()->timeStamp();
-        FieldBuilderPtr fb = fieldCreate->createFieldBuilder();
-
-        StructureConstPtr codecStruc = fb->setId("codec_t")->
-            add("name", pvString)->
-            add("parameters", fieldCreate->createVariantUnion())->
-            createStructure();
-
-        StructureConstPtr dimensionStruc = fb->setId("dimension_t")->
-            add("size", pvInt)->
-            add("offset",  pvInt)->
-            add("fullSize",  pvInt)->
-            add("binning",  pvInt)->
-            add("reverse",  pvBoolean)->
-            createStructure();
-
-        arrayStruc = fb->setId(ntImageStr)->
-            add("value", getValueType())->
-            add("codec", codecStruc)->
-            add("compressedSize", pvLong)->
-            add("uncompressedSize", pvLong)->
-            addArray("dimension", dimensionStruc)->
-            add("dataTimeStamp", timeStruc)->
-            add("uniqueId", pvInt)->
-            addArray("attribute", getAttributeStruc())->
-            add("timeStamp", timeStruc)->
-            createStructure();
-    }
-
-    return arrayStruc;
 }
 
 
