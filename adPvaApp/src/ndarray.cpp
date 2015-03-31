@@ -145,7 +145,7 @@ void setValueField(const PVUnionPtr & valueField, NDArray *pArray, int dataSize)
         shared_vector<const TValueType> csv = freeze(sv);
 
         storedValue->replace(csv);
-        valueField->set(fieldName, storedValue);
+        valueField->postPut();
     }
 }
 
