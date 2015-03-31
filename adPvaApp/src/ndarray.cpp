@@ -232,6 +232,104 @@ void setTimeStampField(const PVStructurePtr & timeStampField, double secsPastUni
 
 
 template <typename T>
+void setAttributeStoredValue(PVUnionPtr const & attributeValue,
+    NDAttribute * attribute, NDAttrDataType_t dataType)
+{
+    PVFieldPtr storedValue = attributeValue->get();
+
+    typedef std::tr1::shared_ptr<T> T_Ptr;
+
+    typename T::value_type value = 0;
+    int status = attribute->getValue(dataType,
+        &value,
+        //dataSize
+        0);
+
+    if (status != ND_ERROR)
+    {
+        T_Ptr storedValue_T = std::tr1::dynamic_pointer_cast<T>(storedValue);
+
+        if (storedValue_T.get() == NULL)
+        {
+            storedValue_T = getPVDataCreate()->createPVScalar<T>();
+        }
+        storedValue_T->put(value);
+        attributeValue->set(storedValue_T);
+    }
+    else
+    {
+        storedValue.reset();
+    }
+}
+
+void setAttributeStoredString(PVUnionPtr const & attributeValue,
+    NDAttribute * attribute, size_t size)
+{
+    PVFieldPtr storedValue = attributeValue->get();;
+    char cstr[size];
+
+    int status = attribute->getValue(NDAttrString, cstr, size);
+
+    if (status != ND_ERROR)
+    {
+        PVStringPtr storedString = std::tr1::dynamic_pointer_cast<PVString>(storedValue);
+
+        if (storedString.get() == NULL)
+        {
+            storedString = getPVDataCreate()->createPVScalar<PVString>();
+        }
+        std::string value(cstr);
+        storedString->put(value);
+        attributeValue->set(storedString);
+    }
+    else
+    {
+        storedValue.reset();
+    }
+}
+
+void setAttributeStoredValue(PVUnionPtr const & attributeValue,
+    NDAttribute * attribute)
+{
+    NDAttrDataType_t dataType;
+    size_t size = 0;
+    int status = attribute->getValueInfo(&dataType, &size);
+
+    if (status != ND_ERROR)
+    {
+        switch (dataType)
+        {
+        case NDAttrInt8:
+            setAttributeStoredValue<PVByte>(attributeValue, attribute, dataType);
+            break;
+
+        case NDAttrInt16:
+            setAttributeStoredValue<PVShort>(attributeValue,attribute, dataType);
+            break;
+
+        case NDAttrInt32:
+           setAttributeStoredValue<PVInt>(attributeValue, attribute, dataType);
+           break;
+
+        case NDAttrFloat32:
+            setAttributeStoredValue<PVFloat>(attributeValue, attribute, dataType);
+            break;
+
+        case NDAttrFloat64:
+            setAttributeStoredValue<PVDouble>(attributeValue, attribute, dataType);
+            break;
+
+        case NDAttrString:
+            setAttributeStoredString(attributeValue, attribute, size); 
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
+template <typename T>
 PVFieldPtr createAttributeStoredValue(NDAttribute * attribute, NDAttrDataType_t dataType)
 {
     PVFieldPtr attStoredValue;
@@ -249,122 +347,56 @@ PVFieldPtr createAttributeStoredValue(NDAttribute * attribute, NDAttrDataType_t 
     return attStoredValue;
 }
 
-PVFieldPtr createAttributeStoredString(NDAttribute * attribute, size_t size)
+
+void setAttribute(PVStructurePtr const & attribute,
+     NDAttribute * ndattribute)
 {
-    PVFieldPtr attStoredValue;
-    char cstr[size];
-
-    int status = attribute->getValue(NDAttrString, cstr, size);
-
-    if (status != ND_ERROR)
-    {
-        std::string value(cstr);
-        PVStringPtr storedValue = getPVDataCreate()->createPVScalar<PVString>();
-        storedValue->put(value);
-        attStoredValue = storedValue;
-    }
-
-    return attStoredValue;
-}
-
-
-PVFieldPtr createAttributeValue(NDAttribute * attribute)
-{
-    PVFieldPtr storedValue;
-    NDAttrDataType_t dataType;
-    size_t size = 0;
-    int status = attribute->getValueInfo(&dataType, &size);
-
-    if (status != ND_ERROR)
-    {
-        switch (dataType)
-        {
-        case NDAttrInt8:
-            storedValue = createAttributeStoredValue<PVByte>(attribute, dataType);
-            break;
-
-        case NDAttrInt16:
-            storedValue = createAttributeStoredValue<PVShort>(attribute, dataType);
-            break;
-
-        case NDAttrInt32:
-           storedValue = createAttributeStoredValue<PVInt>(attribute, dataType);
-           break;
-
-        case NDAttrFloat32:
-            storedValue = createAttributeStoredValue<PVFloat>(attribute, dataType);
-            break;
-
-        case NDAttrFloat64:
-            storedValue = createAttributeStoredValue<PVDouble>(attribute, dataType);
-            break;
-
-        case NDAttrString:
-            storedValue = createAttributeStoredString(attribute, size); 
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    return storedValue;
-}
-
-
-PVStructurePtr createAttribute(NDAttribute * ndattribute)
-{
-    PVStructurePtr attribute;
-
-    PVFieldPtr attStoredValue = createAttributeValue(ndattribute);
-
-    if (attStoredValue.get() != NULL)
-    {
-        attribute = getPVDataCreate()->
-            createPVStructure(getAttributeStruc());
-
 #if AREA_DETECTOR_MAJOR_VERSION >= 2
-        attribute->getSubField<PVString>("name")->put(ndattribute->getName());
-        attribute->getSubField<PVString>("descriptor")->put(ndattribute->getDescription());
-        NDAttrSource_t sourceType;
-        ndattribute->getSourceInfo(&sourceType);
-        attribute->getSubField<PVInt>("sourceType")->put(static_cast<int>(sourceType));
-        attribute->getSubField<PVString>("source")->put(ndattribute->getSource());
+    attribute->getSubField<PVString>("name")->put(ndattribute->getName());
+    attribute->getSubField<PVString>("descriptor")->put(ndattribute->getDescription());
+    NDAttrSource_t sourceType;
+    ndattribute->getSourceInfo(&sourceType);
+    attribute->getSubField<PVInt>("sourceType")->put(static_cast<int>(sourceType));
+    attribute->getSubField<PVString>("source")->put(ndattribute->getSource());
 #else
-        attribute->getSubField<PVString>("name")->put(ndattribute->pName);
-        attribute->getSubField<PVString>("descriptor")->put(ndattribute->pDescription);
-        attribute->getSubField<PVInt>("sourceType")->put(static_cast<int>(ndattribute->sourceType));
-        attribute->getSubField<PVString>("source")->put(ndattribute->pSource);
+    attribute->getSubField<PVString>("name")->put(ndattribute->pName);
+    attribute->getSubField<PVString>("descriptor")->put(ndattribute->pDescription);
+    attribute->getSubField<PVInt>("sourceType")->put(static_cast<int>(ndattribute->sourceType));
+    attribute->getSubField<PVString>("source")->put(ndattribute->pSource);
 #endif
-        attribute->getSubField<PVUnion>("value")->set(attStoredValue);
-    }
+    setAttributeStoredValue(attribute->getSubField<PVUnion>("value"), ndattribute);
 
-    return attribute;
+
 }
-
 
 
 void setAttributeField(const PVStructureArrayPtr & attributeField, NDAttributeList * list)
 {
     const int numberOfAttributes = list->count();
 
-    PVStructureArray::svector attribute;
-    attribute.reserve(numberOfAttributes);
+    StructureConstPtr attributeStruc = attributeField->getStructureArray()->getStructure();
+
+    PVStructureArray::svector attribute(attributeField->reuse());
+    attribute.resize(numberOfAttributes);
 
     NDAttribute * ndattribute = list->next(NULL);
 
+    size_t i = 0;
     while (ndattribute != NULL)
     {
-        PVStructurePtr attributeElement = createAttribute(ndattribute);
-
-        if (attributeElement.get() != NULL)
+        PVStructurePtr const & attributeElement = attribute[i];
+        if (attributeElement.get() == NULL || !attributeElement.unique())
         {
-            attribute.push_back(attributeElement);
+            attribute[i++] = getPVDataCreate()->
+                createPVStructure(getAttributeStruc());
         }
+        setAttribute(attributeElement, ndattribute);
         ndattribute = list->next(ndattribute);
     }
+    attribute.slice(0,i);
     attributeField->replace(freeze(attribute));
 }
+
 
 void setValueAndCodec(const PVStructurePtr & pvStructure, NDArray *pArray)
 { 
