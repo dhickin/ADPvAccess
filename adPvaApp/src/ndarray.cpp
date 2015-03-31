@@ -49,34 +49,6 @@ private:
 };
 
 
-StructureConstPtr getNDArrayStruc()
-{
-    static StructureConstPtr arrayStruc;
-
-    if (arrayStruc == NULL)
-    {
-        nt::NTNDArrayBuilderPtr builder = nt::NTNDArray::createBuilder();
-        builder->addDescriptor()->addTimeStamp()->addAlarm()->addDisplay();
-        arrayStruc = builder->createStructure();
-    }
-
-    return arrayStruc;
-}
-
-StructureConstPtr getAttributeStruc()
-{
-    static StructureConstPtr attributeStruc;
-
-    if (attributeStruc == NULL)
-    {
-        attributeStruc = std::tr1::dynamic_pointer_cast<const StructureArray>(
-            getNDArrayStruc()->getField("attribute"))->getStructure();
-        //attributeStruc = getNDArrayStruc()->
-        //   getField<StructureArray>("attribute")->getStructure();
-    }
-    return attributeStruc;
-}
-
 
 template <typename T>
 void setValueField(const PVUnionPtr & valueField, NDArray *pArray, int dataSize)
@@ -340,7 +312,7 @@ void setAttributeField(const PVStructureArrayPtr & attributeField, NDAttributeLi
         if (attributeElement.get() == NULL || !attributeElement.unique())
         {
             attribute[i++] = getPVDataCreate()->
-                createPVStructure(getAttributeStruc());
+                createPVStructure(attributeStruc);
         }
         setAttribute(attributeElement, ndattribute);
         ndattribute = list->next(ndattribute);
@@ -403,10 +375,6 @@ void putNDArrayToNTNDArray(const PVStructurePtr & pvStructure, NDArray *pArray)
         pArray->pAttributeList);
 }
 
-PVStructurePtr createNTNDArray()
-{
-    return getPVDataCreate()->createPVStructure(getNDArrayStruc());
-}
 
 }}
 

@@ -13,7 +13,7 @@
 #include "ndarray.h"
 
 #include <pv/standardPVField.h>
-
+#include <pv/ntndarray.h>
 
 using namespace epics::pvData;
 using namespace epics::pvDatabase;
@@ -24,8 +24,11 @@ namespace epics { namespace adpva {
 NDArrayRecordPtr NDArrayRecord::create(
     string const & recordName)
 {
+    nt::NTNDArrayBuilderPtr builder = nt::NTNDArray::createBuilder();
+    builder->addDescriptor()->addTimeStamp()->addAlarm()->addDisplay();
+
     NDArrayRecordPtr pvRecord(
-        new NDArrayRecord(recordName,createNTNDArray()));    
+        new NDArrayRecord(recordName,builder->createPVStructure()));    
 
     if(!pvRecord->init()) pvRecord.reset();
 

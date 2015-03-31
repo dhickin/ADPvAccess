@@ -16,7 +16,6 @@ class NDArray;
 
 namespace epics { namespace adpva { 
 
-epics::pvData::PVStructurePtr createNTNDArray();
 void putNDArrayToNTNDArray(const epics::pvData::PVStructurePtr & pvStructure, NDArray *pArray);
 
 }}
