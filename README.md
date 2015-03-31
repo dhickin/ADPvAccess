@@ -1,4 +1,4 @@
 ADPvAccess
 ==========
 
-AreaDetector pvAccess NDArray transport plugin and driver
+AreaDetector pvAccess NDArray transport plugin
