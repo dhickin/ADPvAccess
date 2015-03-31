@@ -1,0 +1,29 @@
+# Macros:
+#% macro, P, Device Prefix
+#% macro, R, Device Suffix
+#% macro, PORT, Asyn Port name
+#% macro, IMPV, Image PV name
+#% macro, TIMEOUT, Timeout
+#% macro, ADDR, Asyn Port address
+
+# This associates the template with an edm screen
+# % gui, $(PORT), edmtab, adPvaServer.edl, IMPV =$(IMPV), P=$(P),R=$(R), ADDR=$(ADDR), TIMEOUT=$(TIMEOUT)
+
+#record(longout, "$(P)$(R)EXAMPLE")
+#{
+#    field(PINI, "YES")
+#    field(DTYP, "asynInt32")
+#    field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))example_parameter")
+#    field(VAL,  "0")
+#}
+
+#record(longin, "$(P)$(R)EXAMPLE_RBV")
+#{
+#    field(DTYP, "asynInt32")
+#    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))example_parameter")
+#    field(SCAN, "I/O Intr")
+#}
+
+
+
+
