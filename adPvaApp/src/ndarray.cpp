@@ -191,18 +191,20 @@ void setValueField(const PVUnionPtr & valueField, NDArray *pArray, int dataSize)
 void setDimensionField(const PVStructureArrayPtr & dimensionField, NDArray *pArray)
 {
     StructureConstPtr dimensionStruc = dimensionField->getStructureArray()->getStructure();
-    PVStructureArray::svector dimension;
-    dimension.reserve(pArray->ndims);
+    PVStructureArray::svector dimension(dimensionField->reuse());
+    dimension.resize(pArray->ndims);
 
     for (int i = 0; i < pArray->ndims; ++i)
     {
-        PVStructurePtr dimensionElement = getPVDataCreate()->createPVStructure(dimensionStruc);
+        PVStructurePtr const & dimensionElement = dimension[i];
+        if(dimensionElement.get() == NULL || !dimensionElement.unique())
+            dimension[i] = getPVDataCreate()->createPVStructure(dimensionStruc);
+
         dimensionElement->getSubField<PVInt>("size")->put(pArray->dims[i].size);
         dimensionElement->getSubField<PVInt>("offset")->put(pArray->dims[i].offset);
         dimensionElement->getSubField<PVInt>("fullSize")->put(pArray->dims[i].size + pArray->dims[i].offset);
         dimensionElement->getSubField<PVInt>("binning")->put(pArray->dims[i].binning);
         dimensionElement->getSubField<PVBoolean>("reverse")->put(pArray->dims[i].reverse);
-        dimension.push_back(dimensionElement);         
     }
     dimensionField->replace(freeze(dimension));
 }
