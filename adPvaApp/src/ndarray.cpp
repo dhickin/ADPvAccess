@@ -252,24 +252,6 @@ void setAttributeStoredValue(PVUnionPtr const & attributeValue,
     }
 }
 
-template <typename T>
-PVFieldPtr createAttributeStoredValue(NDAttribute * attribute, NDAttrDataType_t dataType)
-{
-    PVFieldPtr attStoredValue;
-    typename T::value_type value = 0;
-    int status = attribute->getValue(dataType,
-        &value,
-        //dataSize
-        0);
-    if (status != ND_ERROR)
-    {
-        std::tr1::shared_ptr<T> storedValue = getPVDataCreate()->createPVScalar<T>();
-        storedValue->put(value);
-        attStoredValue = storedValue;
-    }
-    return attStoredValue;
-}
-
 
 void setAttribute(PVStructurePtr const & attribute,
      NDAttribute * ndattribute)
