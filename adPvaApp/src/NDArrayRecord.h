@@ -12,6 +12,7 @@
 #define NDARRAYRECORD_H
 
 #include <pv/pvDatabase.h>
+#include <pv/ntndarray.h>
 #include "NDArray.h"
 
 namespace epics { namespace adpva { 
@@ -35,6 +36,7 @@ public:
 private:
     NDArrayRecord(std::string const & recordName,
         epics::pvData::PVStructurePtr const & pvStructure);
+    epics::nt::NTNDArrayPtr ntndArray;
 };
 
 

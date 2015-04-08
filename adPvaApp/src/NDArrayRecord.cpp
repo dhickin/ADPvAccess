@@ -40,6 +40,7 @@ NDArrayRecord::NDArrayRecord(
     PVStructurePtr const & pvStructure)
 : PVRecord(recordName,pvStructure)
 {
+    ntndArray = nt::NTNDArray::wrap(pvStructure);
 }
 
 NDArrayRecord::~NDArrayRecord()
@@ -60,7 +61,7 @@ bool NDArrayRecord::init()
 
 void NDArrayRecord::put(NDArray *pArray)
 {
-    putNDArrayToNTNDArray(getPVStructure(), pArray);
+    putNDArrayToNTNDArray(ntndArray, pArray);
 }
 
 }}

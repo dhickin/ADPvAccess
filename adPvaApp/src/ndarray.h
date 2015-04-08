@@ -11,12 +11,13 @@
 #define ADPVA_NDARRAY_H
 
 #include <pv/pvData.h>
+#include <pv/ntndarray.h>
 
 class NDArray;
 
 namespace epics { namespace adpva { 
 
-void putNDArrayToNTNDArray(const epics::pvData::PVStructurePtr & pvStructure, NDArray *pArray);
+void putNDArrayToNTNDArray(const epics::nt::NTNDArrayPtr & ntndarray, NDArray *pArray);
 
 }}
 

@@ -13,7 +13,6 @@
 
 #include <pv/pvData.h>
 #include <pv/standardField.h>
-#include <pv/ntndarray.h>
 
 #include <epicsTime.h>
 
@@ -289,8 +288,6 @@ void setAttribute(PVStructurePtr const & attribute,
     attribute->getSubField<PVString>("source")->put(ndattribute->pSource);
 #endif
     setAttributeStoredValue(attribute->getSubField<PVUnion>("value"), ndattribute);
-
-
 }
 
 
@@ -322,7 +319,7 @@ void setAttributeField(const PVStructureArrayPtr & attributeField, NDAttributeLi
 }
 
 
-void setValueAndCodec(const PVStructurePtr & pvStructure, NDArray *pArray)
+void setValueAndCodec(const nt::NTNDArrayPtr & ntndarray, NDArray *pArray)
 { 
     NDArrayInfo_t ndarr_info;
     pArray->getInfo(&ndarr_info);
@@ -331,23 +328,25 @@ void setValueAndCodec(const PVStructurePtr & pvStructure, NDArray *pArray)
     int compressedSize = dataSize;
     string codec = "";
 
-    setValueField(pvStructure->getSubField<PVUnion>("value"), pArray, dataSize);
-    pvStructure->getSubField<PVStructure>("codec")->getSubField<PVString>("name")->put(codec);
+    setValueField(ntndarray->getValue(), pArray, dataSize);
+    ntndarray->getCodec()->getSubField<PVString>("name")->put(codec);
 
-    pvStructure->getSubField<PVLong>("uncompressedSize")->put(dataSize);
-    pvStructure->getSubField<PVLong>("compressedSize")->put(compressedSize);
+    ntndarray->getUncompressedDataSize()->put(dataSize);
+    ntndarray->getCompressedDataSize()->put(compressedSize);
 }
 
 
-void setTimeStamps(const PVStructurePtr & pvStructure, NDArray *pArray)
+
+void setTimeStamps(const nt::NTNDArrayPtr & ntndarray, NDArray *pArray)
 {
-    PVStructurePtr dataTimeStampField = pvStructure->getSubField<PVStructure>("dataTimeStamp");
+    PVStructurePtr dataTimeStampField = ntndarray->getDataTimeStamp();
+
     // Currently assuming NDArray timeStamp is seconds past EPICS epoch. Actual
     // meaning is  driver-dependent. AD documentation suggests seconds since
     // UNIX epoch. In practice EPICS epoch-based seems to be most common.
     setTimeStampField(dataTimeStampField, pArray->timeStamp + EPICS_EPOCH);
 
-    PVStructurePtr timeStampField = pvStructure->getSubField<PVStructure>("timeStamp");
+    PVStructurePtr timeStampField = ntndarray->getTimeStamp();
 
     if (timeStampField.get())
     {
@@ -359,20 +358,19 @@ void setTimeStamps(const PVStructurePtr & pvStructure, NDArray *pArray)
     }
 }
 
-
-
-void putNDArrayToNTNDArray(const PVStructurePtr & pvStructure, NDArray *pArray)
+void putNDArrayToNTNDArray(const nt::NTNDArrayPtr & ntndarray, NDArray *pArray)
 {
-    setValueAndCodec(pvStructure, pArray);
+    setValueAndCodec(ntndarray, pArray);
 
-    setDimensionField(pvStructure->getSubField<PVStructureArray>("dimension"), pArray);
+    setDimensionField(ntndarray->getDimension(), pArray);
 
-    pvStructure->getSubField<PVInt>("uniqueId")->put(pArray->uniqueId);
+    //TODO use ntndarray function - leave for now so builds against 4.4 release
+    //ntndarray->getUniqueId()->put(pArray->uniqueId);
+    ntndarray->getPVStructure()->getSubField<PVInt>("uniqueId")->put(pArray->uniqueId);
 
-    setTimeStamps(pvStructure, pArray);
+    setTimeStamps(ntndarray, pArray);
 
-    setAttributeField(pvStructure->getSubField<PVStructureArray>("attribute"),
-        pArray->pAttributeList);
+    setAttributeField(ntndarray->getAttribute(), pArray->pAttributeList);
 }
 
 
