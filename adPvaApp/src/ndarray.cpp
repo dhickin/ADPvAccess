@@ -27,9 +27,6 @@ using std::tr1::static_pointer_cast;
 
 namespace epics { namespace adpva { 
 
-// EPICS epoch as seconds after UNIX epoch
-const int64_t EPICS_EPOCH = 631152000;
-
 
 template<typename E>
 struct ndarray_deleter
@@ -140,7 +137,7 @@ void setTimeStampField(const PVStructurePtr & timeStampField, int64_t secPastUni
 
 void setTimeStampField(const PVStructurePtr & timeStampField, epicsTimeStamp ts)
 {
-    setTimeStampField(timeStampField, ts.secPastEpoch + EPICS_EPOCH, ts.nsec);
+    setTimeStampField(timeStampField, ts.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH, ts.nsec);
 }
 
 void setTimeStampField(const PVStructurePtr & timeStampField, double secsPastUnixEpoch)
@@ -342,7 +339,8 @@ void setTimeStamps(const nt::NTNDArrayPtr & ntndarray, NDArray *pArray)
     // Currently assuming NDArray timeStamp is seconds past EPICS epoch. Actual
     // meaning is  driver-dependent. AD documentation suggests seconds since
     // UNIX epoch. In practice EPICS epoch-based seems to be most common.
-    setTimeStampField(dataTimeStampField, pArray->timeStamp + EPICS_EPOCH);
+    setTimeStampField(dataTimeStampField,
+        pArray->timeStamp + POSIX_TIME_AT_EPICS_EPOCH);
 
     PVStructurePtr timeStampField = ntndarray->getTimeStamp();
 
