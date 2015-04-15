@@ -92,7 +92,6 @@ void adPvaServer::processCallbacks(NDArray *pArray)
     }
     record->unlock();
 
-    this->callParamCallbacks();
     return;
 }
 
