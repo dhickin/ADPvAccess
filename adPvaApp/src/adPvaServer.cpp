@@ -52,8 +52,9 @@ adPvaServer::adPvaServer(
     int maxmemory)
 : NDPluginDriver(portName.c_str(), queueSize, blockingCallbacks, 
       NDArrayPort.c_str(), NDArrayAddr, 1, 0,
-      maxbuffers, maxmemory, 
-      asynGenericPointerMask, asynGenericPointerMask,
+      maxbuffers, maxmemory,
+      0, // interfaceMask
+      0, // interruptMask,
       ASYN_CANBLOCK, 1, 0, 0),
   imageName(imageName)
 {
