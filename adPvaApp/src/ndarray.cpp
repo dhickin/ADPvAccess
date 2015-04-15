@@ -186,7 +186,7 @@ void setAttributeStoredValue(PVUnionPtr const & attributeValue,
 void setAttributeStoredString(PVUnionPtr const & attributeValue,
     NDAttribute * attribute, size_t size)
 {
-    PVFieldPtr storedValue = attributeValue->get();;
+    PVFieldPtr storedValue = attributeValue->get();
     char cstr[size];
 
     int status = attribute->getValue(NDAttrString, cstr, size);
@@ -207,6 +207,11 @@ void setAttributeStoredString(PVUnionPtr const & attributeValue,
     {
         storedValue.reset();
     }
+}
+
+void setAttributeEmptyStoredValue(PVUnionPtr const & attributeValue)
+{
+    attributeValue->get().reset();
 }
 
 void setAttributeStoredValue(PVUnionPtr const & attributeValue,
@@ -257,6 +262,7 @@ void setAttributeStoredValue(PVUnionPtr const & attributeValue,
             break;
 
         default:
+            setAttributeEmptyStoredValue(attributeValue);
             break;
         }
     }
