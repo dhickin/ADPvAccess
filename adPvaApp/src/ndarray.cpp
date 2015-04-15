@@ -30,8 +30,6 @@ namespace epics { namespace adpva {
 // EPICS epoch as seconds after UNIX epoch
 const int64_t EPICS_EPOCH = 631152000;
 
-const std::string ntImageStr = "epics:nt/NTNDArray:1.0";
-
 
 template<typename E>
 struct ndarray_deleter
