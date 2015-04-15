@@ -9,6 +9,14 @@
 # This associates the template with an edm screen
 # % gui, $(PORT), edmtab, adPvaServer.edl, IMPV =$(IMPV), P=$(P),R=$(R), ADDR=$(ADDR), TIMEOUT=$(TIMEOUT)
 
+record(stringin, "$(P)$(R)ARRAY_PVNAME")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))arrayPVName")
+    field(SCAN, "I/O Intr")
+}
+
+
 #record(longout, "$(P)$(R)EXAMPLE")
 #{
 #    field(PINI, "YES")

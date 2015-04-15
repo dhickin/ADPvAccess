@@ -35,6 +35,13 @@ public:
     virtual void processCallbacks(NDArray *pArray);
 
     ~adPvaServer();
+protected:
+    int arrayPVName;
+    #define FIRST_ADPVASERVER_PARAM arrayPVName
+    #define LAST_ADPVASERVER_PARAM arrayPVName
+
+    // Number of parameters to support in this plugin
+    #define NUM_AD_IMAGE_SERVER_PARAMS ((int)(&LAST_ADPVASERVER_PARAM - &FIRST_ADPVASERVER_PARAM + 1))
 
 private:
     NDArrayRecordPtr record;
@@ -51,7 +58,7 @@ adPvaServer::adPvaServer(
     int maxbuffers,
     int maxmemory)
 : NDPluginDriver(portName.c_str(), queueSize, blockingCallbacks, 
-      NDArrayPort.c_str(), NDArrayAddr, 1, 0,
+      NDArrayPort.c_str(), NDArrayAddr, 1, NUM_AD_IMAGE_SERVER_PARAMS,
       maxbuffers, maxmemory,
       0,  // interfaceMask
       0,  // interruptMask,
@@ -61,7 +68,11 @@ adPvaServer::adPvaServer(
       0), // stack-size
   imageName(imageName)
 {
+    createParam("arrayPVName", asynParamOctet, &arrayPVName);
+
     setStringParam(NDPluginDriverPluginType, "EPICS V4 AD Image Server");
+    setStringParam(arrayPVName, imageName.c_str());
+
     callParamCallbacks();
  
     PVDatabasePtr master = PVDatabase::getMaster();
