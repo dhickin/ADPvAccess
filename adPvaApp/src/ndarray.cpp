@@ -232,6 +232,18 @@ void setAttributeStoredValue(PVUnionPtr const & attributeValue,
            setAttributeStoredValue<PVInt>(attributeValue, attribute, dataType);
            break;
 
+        case NDAttrUInt8:
+            setAttributeStoredValue<PVUByte>(attributeValue, attribute, dataType);
+            break;
+
+        case NDAttrUInt16:
+            setAttributeStoredValue<PVUShort>(attributeValue,attribute, dataType);
+            break;
+
+        case NDAttrUInt32:
+           setAttributeStoredValue<PVUInt>(attributeValue, attribute, dataType);
+           break;
+
         case NDAttrFloat32:
             setAttributeStoredValue<PVFloat>(attributeValue, attribute, dataType);
             break;
