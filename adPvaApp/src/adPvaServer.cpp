@@ -53,9 +53,12 @@ adPvaServer::adPvaServer(
 : NDPluginDriver(portName.c_str(), queueSize, blockingCallbacks, 
       NDArrayPort.c_str(), NDArrayAddr, 1, 0,
       maxbuffers, maxmemory,
-      0, // interfaceMask
-      0, // interruptMask,
-      ASYN_CANBLOCK, 1, 0, 0),
+      0,  // interfaceMask
+      0,  // interruptMask,
+      ASYN_CANBLOCK,
+      1,  // autoconnect
+      0,  // priority
+      0), // stack-size
   imageName(imageName)
 {
     setStringParam(NDPluginDriverPluginType, "EPICS V4 AD Image Server");
