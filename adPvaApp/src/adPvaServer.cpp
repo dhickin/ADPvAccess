@@ -64,6 +64,8 @@ adPvaServer::adPvaServer(
     record = NDArrayRecord::create(imageName);
     bool result = master->addRecord(record);
     if(!result) std::cerr << "recordname" << " not added" << std::endl;
+
+    connectToArrayPort();
 }
 
 adPvaServer::~adPvaServer()
